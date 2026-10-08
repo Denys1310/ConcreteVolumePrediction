@@ -1,7 +1,11 @@
 
 import subprocess
+from pathlib import Path
 
 import streamlit as st
+
+
+PROJECT_DIR = Path(__file__).resolve().parent
 
 
 st.set_page_config(
@@ -11,16 +15,31 @@ st.set_page_config(
 )
 
 
+@st.cache_resource
+def compile_java():
+    subprocess.run(
+        ["javac", "Predict.java"],
+        cwd=PROJECT_DIR,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=30,
+    )
+
+
 def predict_concrete_volume(temperature: float, productivity: str) -> float:
+    compile_java()
+
     result = subprocess.run(
         [
             "java",
             "-cp",
-            "/app",
+            str(PROJECT_DIR),
             "Predict",
             str(temperature),
             productivity,
         ],
+        cwd=PROJECT_DIR,
         capture_output=True,
         text=True,
         check=True,
